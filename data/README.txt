@@ -1,0 +1,1 @@
+Place the original EduPro Excel workbook in this folder for project organization. The dashboard accepts workbook upload directly and expects Users, Courses, and Transactions sheets. No source dataset was attached when this project package was generated, so no fabricated dataset or numerical findings are included.
