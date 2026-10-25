@@ -468,14 +468,27 @@ with tab_behavior:
     beh_col1, beh_col2 = st.columns(2)
 
     with beh_col1:
-        fig_user_hist = px.histogram(
-            user_enroll_counts,
-            nbins=16,
-            title="Distribution of Course Enrollments per Learner",
-            color_discrete_sequence=["#0ea5e9"]
+        course_col = "CourseName" if "CourseName" in filtered.columns else "CourseID"
+        top_courses = filtered.groupby(course_col, dropna=False).size().sort_values(ascending=False).head(10).reset_index(name="Enrollments")
+        fig_top = px.bar(
+            top_courses,
+            x="Enrollments",
+            y=course_col,
+            orientation="h",
+            title="Top 10 Most Enrolled Courses",
+            text="Enrollments",
+            color="Enrollments",
+            color_continuous_scale="Blues"
         )
-        fig_user_hist.update_layout(xaxis_title="Number of Courses Enrolled", yaxis_title="Number of Learners")
-        st.plotly_chart(fig_user_hist, use_container_width=True)
+        fig_top.update_layout(
+            yaxis={'categoryorder': 'total ascending'},
+            xaxis_title="Number of Enrollments",
+            yaxis_title="Course Name",
+            showlegend=False,
+            coloraxis_showscale=False
+        )
+        fig_top.update_traces(textposition="outside")
+        st.plotly_chart(fig_top, use_container_width=True)
 
     with beh_col2:
         if "PaymentMethod" in filtered.columns:
