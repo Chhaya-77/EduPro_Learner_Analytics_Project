@@ -13,19 +13,17 @@ Online education platforms serve as vital public infrastructure for workforce up
 
 ---
 
-### Key Performance Indicators (KPIs) Scorecard
+### Key Performance Indicators (KPIs) Scorecard (Unified Mentor Framework)
 
-| Key Performance Indicator (KPI) | Quantitative Result | Strategic Interpretation |
-| :--- | :--- | :--- |
-| **Total Platform Enrollments** | **10,000 Records** | Substantial platform adoption across the annual transaction window. |
-| **Unique Active Learners** | **3,000 Learners** | Active community baseline across youth and working adults. |
-| **Active Catalog Depth** | **60 Courses** | Structured catalog spanning 12 distinct skill domains (5 courses per domain). |
-| **Primary Age Demographic** | **26–35 Years (48.0%)** | Young professionals seeking career upskilling form the largest single segment. |
-| **Gender Inclusivity Ratio** | **50.8% F / 49.2% M** | Exemplary gender parity achieved across both enrollment and unique user metrics. |
-| **Leading Course Domain** | **Data Science (9.16%)** | Highest overall market demand (916 enrollments), followed by Finance (864 enrollments). |
-| **Skill Tier Preference** | **Beginner (35.7%) / Adv (34.8%)** | Bimodal demand: strong entry-level onboarding and high appetite for advanced mastery. |
-| **Course Access Mode** | **64.0% Free / 36.0% Paid** | Free offerings serve as the primary learner acquisition funnel. |
-| **Data Integrity Rating** | **100% Referential Integrity** | 0 orphan transactions, 0 missing identifiers, 100% join verification. |
+| Official Framework KPI | Description / Dimension | Quantitative Result | Strategic Interpretation |
+| :--- | :--- | :--- | :--- |
+| **Total Enrollments** | Platform engagement indicator | **10,000 Records** | Substantial platform adoption across the annual transaction window. |
+| **Enrollments by Age Group** | Demographic reach | **26–35 Yrs (48.1%) \| 18–25 Yrs (31.6%)** | Young professionals seeking career upskilling form the largest single segment. |
+| **Gender Participation Ratio** | Inclusivity metric | **50.8% F / 49.2% M** | Exemplary 50/50 gender parity achieved across both enrollment and unique user metrics. |
+| **Category Popularity Index** | Course demand | **Data Science (916 / 9.16%)** | Highest overall market demand, followed by Web Development and AI. |
+| **Level Preference Distribution** | Skill maturity insight | **Beginner: 35.7% \| Adv: 34.8%** | Bimodal demand: strong entry-level onboarding and high appetite for advanced mastery. |
+| **Catalog Access Mode** | Monetization reach | **64.0% Free / 36.0% Paid** | Free offerings serve as the primary learner acquisition funnel. |
+| **Data Integrity Rating** | Verification benchmark | **100% Referential Integrity** | 0 orphan transactions, 0 missing identifiers, 100% join verification. |
 
 ---
 

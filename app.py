@@ -262,14 +262,13 @@ with tab_kpi:
     kpi_col1, kpi_col2 = st.columns([1, 1])
 
     with kpi_col1:
-        st.markdown("#### Platform Scale & Participation Summary")
+        st.markdown("#### Official Framework KPI Summary")
         kpi_table_data = [
-            {"KPI Name": "Total Enrollments", "Metric": f"{total_enrollments:,}", "Dimension": "Platform Engagement", "Insight": "Total transactional course registrations"},
-            {"KPI Name": "Demographic Reach (Top Age)", "Metric": "26–35 Years (48.0%)", "Dimension": "Age Distribution", "Insight": "Dominant career-transition / upskilling cohort"},
-            {"KPI Name": "Gender Participation Ratio", "Metric": "50.8% F / 49.2% M", "Dimension": "Inclusivity Metric", "Insight": "Near-perfect gender parity across enrollments"},
-            {"KPI Name": "Category Popularity Index", "Metric": "Data Science (916 enrollments)", "Dimension": "Course Demand", "Insight": "Highest demand subject area (9.16% total share)"},
-            {"KPI Name": "Skill Level Distribution", "Metric": "Beginner: 35.7% | Adv: 34.8%", "Dimension": "Skill Maturity", "Insight": "High appetite for foundational and mastery content"},
-            {"KPI Name": "Catalog Access Mode", "Metric": "64.0% Free / 36.0% Paid", "Dimension": "Monetization Access", "Insight": "Free courses drive 64% of learner acquisition"}
+            {"KPI Name": "Total Enrollments", "Description": "Platform engagement indicator", "Observed Result": f"{total_enrollments:,}", "Strategic Insight": "Total transactional course registrations on platform"},
+            {"KPI Name": "Enrollments by Age Group", "Description": "Demographic reach", "Observed Result": "26–35 Yrs: 48.1% | 18–25 Yrs: 31.6%", "Strategic Insight": "Dominant career-transition & upskilling segment"},
+            {"KPI Name": "Gender Participation Ratio", "Description": "Inclusivity metric", "Observed Result": "50.8% Female / 49.2% Male", "Strategic Insight": "Near-perfect 50/50 gender equity across catalog"},
+            {"KPI Name": "Category Popularity Index", "Description": "Course demand", "Observed Result": "Data Science (916 enrollments)", "Strategic Insight": "Highest demand subject domain (9.16% catalog share)"},
+            {"KPI Name": "Level Preference Distribution", "Description": "Skill maturity insight", "Observed Result": "Beginner: 35.7% | Advanced: 34.8%", "Strategic Insight": "Bimodal demand: foundational skills + advanced mastery"}
         ]
         st.dataframe(pd.DataFrame(kpi_table_data), use_container_width=True, hide_index=True)
 
