@@ -183,6 +183,7 @@ with st.sidebar:
     chosen_ages = st.multiselect("Age Groups", age_options, default=age_options)
     chosen_genders = st.multiselect("Gender", gender_options, default=gender_options)
     chosen_categories = st.multiselect("Course Categories", category_options, default=category_options)
+    st.caption("ℹ️ Categories group 60 individual courses (e.g., 'Programming' includes Python, Full Stack; 'Design' includes Photoshop).")
     chosen_levels = st.multiselect("Course Levels", level_options, default=level_options)
     chosen_types = st.multiselect("Course Types", type_options, default=type_options)
 
@@ -562,55 +563,66 @@ with tab_quality:
         
         rc1, rc2 = st.columns(2)
         
-        with rc1:
-            top_rated = courses[["CourseName", "CourseCategory", "CourseRating"]].drop_duplicates("CourseName").sort_values("CourseRating", ascending=False).head(10)
-            top_rated["RatingLabel"] = top_rated["CourseRating"].apply(lambda r: f"{r:.2f} ⭐")
+        courses_active = courses[
+            courses["CourseCategory"].isin(chosen_categories) 
+            & courses["CourseLevel"].isin(chosen_levels) 
+            & courses["CourseType"].isin(chosen_types)
+        ].copy()
+        
+        if len(courses_active) == 0:
+            st.info("No courses match the current sidebar filter selection.")
+        else:
+            courses_active["CourseDisplay"] = courses_active["CourseName"] + " [" + courses_active["CourseCategory"] + "]"
             
-            fig_top_r = px.bar(
-                top_rated,
-                x="CourseRating",
-                y="CourseName",
-                orientation="h",
-                title="Top 10 Highest Rated Courses (Gold Standard)",
-                text="RatingLabel",
-                color="CourseRating",
-                color_continuous_scale="Greens"
-            )
-            fig_top_r.update_layout(
-                yaxis={'categoryorder': 'total ascending'},
-                xaxis_title="Rating (Stars out of 5.0)",
-                yaxis_title="Course Name",
-                xaxis=dict(range=[0, 5.6]),
-                showlegend=False,
-                coloraxis_showscale=False
-            )
-            fig_top_r.update_traces(textposition="outside")
-            st.plotly_chart(fig_top_r, use_container_width=True)
+            with rc1:
+                top_rated = courses_active[["CourseDisplay", "CourseRating"]].drop_duplicates("CourseDisplay").sort_values("CourseRating", ascending=False).head(10)
+                top_rated["RatingLabel"] = top_rated["CourseRating"].apply(lambda r: f"{r:.2f} ⭐")
+                
+                fig_top_r = px.bar(
+                    top_rated,
+                    x="CourseRating",
+                    y="CourseDisplay",
+                    orientation="h",
+                    title="Top 10 Highest Rated Courses (Gold Standard)",
+                    text="RatingLabel",
+                    color="CourseRating",
+                    color_continuous_scale="Greens"
+                )
+                fig_top_r.update_layout(
+                    yaxis={'categoryorder': 'total ascending'},
+                    xaxis_title="Rating (Stars out of 5.0)",
+                    yaxis_title="Course [Category]",
+                    xaxis=dict(range=[0, 5.6]),
+                    showlegend=False,
+                    coloraxis_showscale=False
+                )
+                fig_top_r.update_traces(textposition="outside")
+                st.plotly_chart(fig_top_r, use_container_width=True)
 
-        with rc2:
-            low_rated = courses[["CourseName", "CourseCategory", "CourseRating"]].drop_duplicates("CourseName").sort_values("CourseRating", ascending=True).head(10)
-            low_rated["RatingLabel"] = low_rated["CourseRating"].apply(lambda r: f"{r:.2f} ⭐")
-            
-            fig_low_r = px.bar(
-                low_rated,
-                x="CourseRating",
-                y="CourseName",
-                orientation="h",
-                title="Lowest 10 Rated Courses (Curriculum Review Needed)",
-                text="RatingLabel",
-                color="CourseRating",
-                color_continuous_scale="Reds_r"
-            )
-            fig_low_r.update_layout(
-                yaxis={'categoryorder': 'total descending'},
-                xaxis_title="Rating (Stars out of 5.0)",
-                yaxis_title="Course Name",
-                xaxis=dict(range=[0, 5.6]),
-                showlegend=False,
-                coloraxis_showscale=False
-            )
-            fig_low_r.update_traces(textposition="outside")
-            st.plotly_chart(fig_low_r, use_container_width=True)
+            with rc2:
+                low_rated = courses_active[["CourseDisplay", "CourseRating"]].drop_duplicates("CourseDisplay").sort_values("CourseRating", ascending=True).head(10)
+                low_rated["RatingLabel"] = low_rated["CourseRating"].apply(lambda r: f"{r:.2f} ⭐")
+                
+                fig_low_r = px.bar(
+                    low_rated,
+                    x="CourseRating",
+                    y="CourseDisplay",
+                    orientation="h",
+                    title="Lowest 10 Rated Courses (Curriculum Review Needed)",
+                    text="RatingLabel",
+                    color="CourseRating",
+                    color_continuous_scale="Reds_r"
+                )
+                fig_low_r.update_layout(
+                    yaxis={'categoryorder': 'total descending'},
+                    xaxis_title="Rating (Stars out of 5.0)",
+                    yaxis_title="Course [Category]",
+                    xaxis=dict(range=[0, 5.6]),
+                    showlegend=False,
+                    coloraxis_showscale=False
+                )
+                fig_low_r.update_traces(textposition="outside")
+                st.plotly_chart(fig_low_r, use_container_width=True)
 
         with st.expander("🔍 View Complete Catalog Scatter Landscape (Duration vs. Rating)", expanded=False):
             course_perf = filtered.groupby(["CourseID", "CourseName", "CourseCategory", "CourseLevel"], dropna=False).size().reset_index(name="Total Enrollments")
