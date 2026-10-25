@@ -555,31 +555,88 @@ with tab_quality:
         )
         st.plotly_chart(fig_trend, use_container_width=True)
 
-    # Chart 2: Course Rating vs Duration Bubble Chart
-    if "CourseRating" in courses.columns and "CourseDuration" in courses.columns:
+    # Chart 2: Course Rating & Quality Analysis
+    if "CourseRating" in courses.columns:
         st.markdown("---")
-        st.markdown("#### 🎯 Course Performance Matrix (Duration vs. Rating vs. Popularity)")
-        course_perf = filtered.groupby(["CourseID", "CourseName", "CourseCategory", "CourseLevel"], dropna=False).size().reset_index(name="Total Enrollments")
-        course_meta = courses[["CourseID", "CourseRating", "CourseDuration", "CoursePrice"]].drop_duplicates("CourseID")
-        course_bubble = course_perf.merge(course_meta, on="CourseID", how="left")
+        st.markdown("#### ⭐ Course Quality & Student Satisfaction Benchmark")
         
-        fig_bubble = px.scatter(
-            course_bubble,
-            x="CourseDuration",
-            y="CourseRating",
-            size="Total Enrollments",
-            color="CourseCategory",
-            hover_name="CourseName",
-            title="Course Catalog Landscape: Duration vs. Student Rating (Bubble Size = Enrollments)",
-            labels={"CourseDuration": "Course Duration (Hours)", "CourseRating": "Course Rating (1–5 Stars)"},
-            size_max=32
-        )
-        fig_bubble.update_layout(
-            xaxis_title="Course Duration (Hours)",
-            yaxis_title="Course Rating (Stars)",
-            legend_title_text="Category"
-        )
-        st.plotly_chart(fig_bubble, use_container_width=True)
+        rc1, rc2 = st.columns(2)
+        
+        with rc1:
+            top_rated = courses[["CourseName", "CourseCategory", "CourseRating"]].drop_duplicates("CourseName").sort_values("CourseRating", ascending=False).head(10)
+            top_rated["RatingLabel"] = top_rated["CourseRating"].apply(lambda r: f"{r:.2f} ⭐")
+            
+            fig_top_r = px.bar(
+                top_rated,
+                x="CourseRating",
+                y="CourseName",
+                orientation="h",
+                title="Top 10 Highest Rated Courses (Gold Standard)",
+                text="RatingLabel",
+                color="CourseRating",
+                color_continuous_scale="Greens"
+            )
+            fig_top_r.update_layout(
+                yaxis={'categoryorder': 'total ascending'},
+                xaxis_title="Rating (Stars out of 5.0)",
+                yaxis_title="Course Name",
+                xaxis=dict(range=[0, 5.6]),
+                showlegend=False,
+                coloraxis_showscale=False
+            )
+            fig_top_r.update_traces(textposition="outside")
+            st.plotly_chart(fig_top_r, use_container_width=True)
+
+        with rc2:
+            low_rated = courses[["CourseName", "CourseCategory", "CourseRating"]].drop_duplicates("CourseName").sort_values("CourseRating", ascending=True).head(10)
+            low_rated["RatingLabel"] = low_rated["CourseRating"].apply(lambda r: f"{r:.2f} ⭐")
+            
+            fig_low_r = px.bar(
+                low_rated,
+                x="CourseRating",
+                y="CourseName",
+                orientation="h",
+                title="Lowest 10 Rated Courses (Curriculum Review Needed)",
+                text="RatingLabel",
+                color="CourseRating",
+                color_continuous_scale="Reds_r"
+            )
+            fig_low_r.update_layout(
+                yaxis={'categoryorder': 'total descending'},
+                xaxis_title="Rating (Stars out of 5.0)",
+                yaxis_title="Course Name",
+                xaxis=dict(range=[0, 5.6]),
+                showlegend=False,
+                coloraxis_showscale=False
+            )
+            fig_low_r.update_traces(textposition="outside")
+            st.plotly_chart(fig_low_r, use_container_width=True)
+
+        with st.expander("🔍 View Complete Catalog Scatter Landscape (Duration vs. Rating)", expanded=False):
+            course_perf = filtered.groupby(["CourseID", "CourseName", "CourseCategory", "CourseLevel"], dropna=False).size().reset_index(name="Total Enrollments")
+            course_meta = courses[["CourseID", "CourseRating", "CourseDuration", "CoursePrice"]].drop_duplicates("CourseID")
+            course_bubble = course_perf.merge(course_meta, on="CourseID", how="left")
+            
+            fig_bubble = px.scatter(
+                course_bubble,
+                x="CourseDuration",
+                y="CourseRating",
+                size="Total Enrollments",
+                color="CourseCategory",
+                hover_name="CourseName",
+                title="Course Catalog Landscape: Duration vs. Student Rating",
+                labels={"CourseDuration": "Course Duration (Hours)", "CourseRating": "Course Rating (1–5 Stars)"},
+                size_max=28
+            )
+            # Add quality threshold lines
+            fig_bubble.add_hline(y=4.0, line_dash="dash", line_color="#10b981", annotation_text="Quality Benchmark (4.0★)", annotation_position="top left")
+            fig_bubble.add_hline(y=2.5, line_dash="dash", line_color="#ef4444", annotation_text="Review Threshold (2.5★)", annotation_position="bottom left")
+            fig_bubble.update_layout(
+                xaxis_title="Course Duration (Hours)",
+                yaxis_title="Course Rating (Stars)",
+                legend_title_text="Category"
+            )
+            st.plotly_chart(fig_bubble, use_container_width=True)
 
     q_table = [
         {"Audit Check": "Unique Users after Deduplication", "Observed Count": f"{quality['unique_users']:,}", "Status": "Verified"},
