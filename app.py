@@ -248,16 +248,51 @@ with tab_kpi:
     with kpi_col2:
         st.markdown("#### Gender Inclusivity & Enrollment Split")
         gender_agg = filtered.groupby("Gender", dropna=False).size().reset_index(name="Enrollments")
+        
+        # Premium executive color palette
+        gender_colors = {
+            "Female": "#a855f7",  # Vibrant Royal Violet
+            "Male": "#06b6d4",    # Electric Ocean Cyan
+            "Other": "#f59e0b"    # Golden Amber
+        }
+        
         fig_gender_pie = px.pie(
             gender_agg,
             names="Gender",
             values="Enrollments",
-            hole=0.45,
+            hole=0.52,
             color="Gender",
-            color_discrete_map={"Female": "#ec4899", "Male": "#3b82f6", "Other": "#8b5cf6"},
-            title="Enrollment Share by Gender"
+            color_discrete_map=gender_colors,
+            title="Gender Participation Balance"
         )
-        fig_gender_pie.update_traces(textposition='inside', textinfo='percent+label')
+        fig_gender_pie.update_traces(
+            textposition='inside',
+            textinfo='label+percent',
+            textfont=dict(size=14, color="white"),
+            marker=dict(line=dict(color='#0b0f19', width=3.5)),
+            pull=[0.02] * len(gender_agg)
+        )
+        fig_gender_pie.update_layout(
+            annotations=[
+                dict(
+                    text="<b>50 / 50<br>Parity</b>",
+                    x=0.5,
+                    y=0.5,
+                    font_size=15,
+                    font_color="#e2e8f0",
+                    showarrow=False
+                )
+            ],
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.12,
+                xanchor="center",
+                x=0.5,
+                font=dict(color="#cbd5e1")
+            )
+        )
         st.plotly_chart(fig_gender_pie, use_container_width=True)
 
     st.markdown("---")
@@ -333,7 +368,7 @@ with tab_demo:
             title="Unique Learners by Gender",
             text="Learners",
             color="Gender",
-            color_discrete_map={"Female": "#ec4899", "Male": "#3b82f6"}
+            color_discrete_map={"Female": "#a855f7", "Male": "#06b6d4"}
         )
         fig_gen_u.update_traces(textposition="outside")
         st.plotly_chart(fig_gen_u, use_container_width=True)
