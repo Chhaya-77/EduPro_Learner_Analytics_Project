@@ -4,7 +4,33 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 import streamlit as st
+
+# Configure global dark theme for all Plotly visualizations
+pio.templates.default = "plotly_dark"
+
+def polish_dark_fig(fig):
+    """Applies high-contrast dark theme styling to Plotly figures."""
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#f8fafc"),
+        title_font=dict(color="#f8fafc", size=15),
+        legend=dict(font=dict(color="#cbd5e1"))
+    )
+    fig.update_xaxes(
+        tickfont=dict(color="#cbd5e1"),
+        title_font=dict(color="#f8fafc"),
+        gridcolor="rgba(255, 255, 255, 0.08)"
+    )
+    fig.update_yaxes(
+        tickfont=dict(color="#cbd5e1"),
+        title_font=dict(color="#f8fafc"),
+        gridcolor="rgba(255, 255, 255, 0.08)"
+    )
+    return fig
 
 # Set page configuration
 st.set_page_config(
@@ -14,26 +40,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom styling for clean modern government/enterprise UI
+# Custom styling for clean modern high-contrast dark theme UI
 st.markdown("""
 <style>
     .block-container {padding-top: 1.2rem; padding-bottom: 2.5rem;}
     [data-testid="stMetric"] {
-        background-color: rgba(248, 250, 252, 0.05);
-        border: 1px solid rgba(128, 128, 128, 0.25);
+        background-color: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         padding: 14px 18px;
         border-radius: 10px;
     }
-    .kpi-title { font-size: 0.85rem; font-weight: 600; color: #64748b; margin-bottom: 4px; }
-    .kpi-value { font-size: 1.6rem; font-weight: 700; color: #1e293b; }
+    [data-testid="stMetricValue"] { color: #f8fafc !important; }
+    [data-testid="stMetricLabel"] { color: #94a3b8 !important; }
+    .kpi-title { font-size: 0.85rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px; }
+    .kpi-value { font-size: 1.6rem; font-weight: 700; color: #f8fafc; }
     .badge {
         display: inline-block;
         padding: 3px 8px;
         border-radius: 6px;
         font-size: 0.75rem;
         font-weight: 600;
-        background: #e2e8f0;
-        color: #334155;
+        background: #334155;
+        color: #f8fafc;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -249,18 +277,18 @@ with tab_kpi:
         st.markdown("#### Gender Inclusivity & Enrollment Split")
         gender_agg = filtered.groupby("Gender", dropna=False).size().reset_index(name="Enrollments")
         
-        # Premium executive color palette
+        # Premium executive color palette (High-contrast, elegant, attractive)
         gender_colors = {
-            "Female": "#a855f7",  # Vibrant Royal Violet
-            "Male": "#06b6d4",    # Electric Ocean Cyan
-            "Other": "#f59e0b"    # Golden Amber
+            "Female": "#f43f5e",  # Vibrant Coral Rose
+            "Male": "#3b82f6",    # Electric Royal Blue
+            "Other": "#f59e0b"    # Golden Sun Amber
         }
         
         fig_gender_pie = px.pie(
             gender_agg,
             names="Gender",
             values="Enrollments",
-            hole=0.52,
+            hole=0.55,
             color="Gender",
             color_discrete_map=gender_colors,
             title="Gender Participation Balance"
@@ -268,18 +296,21 @@ with tab_kpi:
         fig_gender_pie.update_traces(
             textposition='inside',
             textinfo='label+percent',
-            textfont=dict(size=14, color="white"),
-            marker=dict(line=dict(color='#0b0f19', width=3.5)),
+            textfont=dict(size=14, color="#ffffff", family="sans-serif"),
+            marker=dict(line=dict(color='#0b0f19', width=3)),
             pull=[0.02] * len(gender_agg)
         )
         fig_gender_pie.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            title_font=dict(color="#f8fafc", size=15),
             annotations=[
                 dict(
-                    text="<b>50 / 50<br>Parity</b>",
+                    text="<b>50 / 50<br><span style='font-size:12px; font-weight:normal; color:#cbd5e1;'>Parity</span></b>",
                     x=0.5,
                     y=0.5,
-                    font_size=15,
-                    font_color="#e2e8f0",
+                    font_size=16,
+                    font_color="#ffffff",
                     showarrow=False
                 )
             ],
@@ -290,7 +321,7 @@ with tab_kpi:
                 y=-0.12,
                 xanchor="center",
                 x=0.5,
-                font=dict(color="#cbd5e1")
+                font=dict(color="#f8fafc", size=12)
             )
         )
         st.plotly_chart(fig_gender_pie, use_container_width=True)
@@ -310,9 +341,10 @@ with tab_kpi:
             title="Total Enrollments by Age Group",
             text="Enrollments",
             color="AgeGroup",
-            color_discrete_sequence=px.colors.qualitative.Prism
+            color_discrete_sequence=["#38bdf8", "#818cf8", "#a855f7", "#ec4899", "#f59e0b", "#10b981"]
         )
-        fig_age_bar.update_traces(textposition="outside")
+        fig_age_bar.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        polish_dark_fig(fig_age_bar)
         chart_c1.plotly_chart(fig_age_bar, use_container_width=True)
 
     with chart_c2:
@@ -324,9 +356,10 @@ with tab_kpi:
             title="Enrollment Breakdown by Course Type (Free vs Paid)",
             text="Enrollments",
             color="CourseType",
-            color_discrete_map={"Free": "#10b981", "Paid": "#f59e0b"}
+            color_discrete_map={"Free": "#10b981", "Paid": "#3b82f6"}
         )
-        fig_type_bar.update_traces(textposition="outside")
+        fig_type_bar.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        polish_dark_fig(fig_type_bar)
         chart_c2.plotly_chart(fig_type_bar, use_container_width=True)
 
 # ----------------- TAB 2: LEARNER DEMOGRAPHICS -----------------
@@ -357,6 +390,7 @@ with tab_demo:
             marginal="box"
         )
         fig_hist.update_layout(xaxis_title="Age (Years)", yaxis_title="Number of Learners")
+        polish_dark_fig(fig_hist)
         st.plotly_chart(fig_hist, use_container_width=True)
 
     with col_gen:
@@ -368,9 +402,10 @@ with tab_demo:
             title="Unique Learners by Gender",
             text="Learners",
             color="Gender",
-            color_discrete_map={"Female": "#a855f7", "Male": "#06b6d4"}
+            color_discrete_map={"Female": "#f43f5e", "Male": "#3b82f6", "Other": "#f59e0b"}
         )
-        fig_gen_u.update_traces(textposition="outside")
+        fig_gen_u.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        polish_dark_fig(fig_gen_u)
         st.plotly_chart(fig_gen_u, use_container_width=True)
 
     st.markdown("#### Age Band Distribution (Learners vs Enrollments)")
@@ -400,10 +435,11 @@ with tab_pref:
             title="Course Category Popularity (Ranked)",
             text="Enrollments",
             color="Enrollments",
-            color_continuous_scale="Blues"
+            color_continuous_scale=["#0369a1", "#0284c7", "#38bdf8", "#818cf8"]
         )
-        fig_cat.update_layout(yaxis={'categoryorder':'total ascending'})
-        fig_cat.update_traces(textposition="outside")
+        fig_cat.update_layout(yaxis={'categoryorder':'total ascending'}, coloraxis_showscale=False)
+        fig_cat.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        polish_dark_fig(fig_cat)
         st.plotly_chart(fig_cat, use_container_width=True)
 
     with c_lev:
@@ -418,14 +454,15 @@ with tab_pref:
             title="Enrollment by Course Level",
             text="Display",
             color="CourseLevel",
-            color_discrete_map={"Beginner": "#3b82f6", "Advanced": "#8b5cf6", "Intermediate": "#f59e0b"}
+            color_discrete_map={"Beginner": "#38bdf8", "Advanced": "#a855f7", "Intermediate": "#fbbf24"}
         )
         fig_lev.update_layout(
             xaxis_title="Course Level",
             yaxis_title="Number of Enrollments",
             showlegend=False
         )
-        fig_lev.update_traces(textposition="outside")
+        fig_lev.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        polish_dark_fig(fig_lev)
         st.plotly_chart(fig_lev, use_container_width=True)
 
     st.markdown("#### Category Demand Breakdown Table")
@@ -463,6 +500,7 @@ with tab_segment:
             color_continuous_scale="Viridis",
             labels=dict(x="Course Category", y="Age Group", color="Value")
         )
+        polish_dark_fig(fig_heat)
         st.plotly_chart(fig_heat, use_container_width=True)
 
     st.markdown("---")
@@ -478,8 +516,9 @@ with tab_segment:
             color="CourseLevel",
             barmode="group",
             title="Course Level Choice across Gender",
-            color_discrete_map={"Beginner": "#3b82f6", "Intermediate": "#f59e0b", "Advanced": "#8b5cf6"}
+            color_discrete_map={"Beginner": "#38bdf8", "Intermediate": "#fbbf24", "Advanced": "#a855f7"}
         )
+        polish_dark_fig(fig_gen_lev)
         st.plotly_chart(fig_gen_lev, use_container_width=True)
 
     with s_c2:
@@ -492,8 +531,9 @@ with tab_segment:
             color="CourseLevel",
             barmode="group",
             title="Course Level Choice across Age Groups",
-            color_discrete_map={"Beginner": "#3b82f6", "Intermediate": "#f59e0b", "Advanced": "#8b5cf6"}
+            color_discrete_map={"Beginner": "#38bdf8", "Intermediate": "#fbbf24", "Advanced": "#a855f7"}
         )
+        polish_dark_fig(fig_age_lev)
         st.plotly_chart(fig_age_lev, use_container_width=True)
 
 # ----------------- TAB 5: BEHAVIORAL PATTERNS -----------------
@@ -521,7 +561,7 @@ with tab_behavior:
             title="Top 10 Most Enrolled Courses",
             text="Enrollments",
             color="Enrollments",
-            color_continuous_scale="Blues"
+            color_continuous_scale=["#0369a1", "#0284c7", "#38bdf8", "#818cf8"]
         )
         fig_top.update_layout(
             yaxis={'categoryorder': 'total ascending'},
@@ -530,7 +570,8 @@ with tab_behavior:
             showlegend=False,
             coloraxis_showscale=False
         )
-        fig_top.update_traces(textposition="outside")
+        fig_top.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        polish_dark_fig(fig_top)
         st.plotly_chart(fig_top, use_container_width=True)
 
     with beh_col2:
@@ -542,9 +583,15 @@ with tab_behavior:
                 values="Transactions",
                 title="Transaction Share by Payment Method",
                 hole=0.45,
-                color_discrete_sequence=px.colors.qualitative.Pastel
+                color_discrete_sequence=["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"]
             )
-            fig_pm.update_traces(textposition='inside', textinfo='percent+label')
+            fig_pm.update_traces(
+                textposition='inside',
+                textinfo='percent+label',
+                textfont=dict(color="#ffffff", size=13, family="sans-serif"),
+                marker=dict(line=dict(color='#0b0f19', width=2.5))
+            )
+            polish_dark_fig(fig_pm)
             st.plotly_chart(fig_pm, use_container_width=True)
 
 # ----------------- TAB 6: DATA INTEGRITY & EXPORT -----------------
@@ -589,6 +636,7 @@ with tab_quality:
             yaxis_title="Total Enrollments",
             hovermode="x unified"
         )
+        polish_dark_fig(fig_trend)
         st.plotly_chart(fig_trend, use_container_width=True)
 
     # Chart 2: Course Rating & Quality Analysis
@@ -621,17 +669,18 @@ with tab_quality:
                     title="Top 10 Highest Rated Courses (Gold Standard)",
                     text="RatingLabel",
                     color="CourseRating",
-                    color_continuous_scale="Greens"
+                    color_continuous_scale=["#059669", "#10b981", "#34d399"]
                 )
                 fig_top_r.update_layout(
                     yaxis={'categoryorder': 'total ascending'},
                     xaxis_title="Rating (Stars out of 5.0)",
                     yaxis_title="Course [Category]",
-                    xaxis=dict(range=[0, 5.6]),
+                    xaxis=dict(range=[0, 5.8]),
                     showlegend=False,
                     coloraxis_showscale=False
                 )
-                fig_top_r.update_traces(textposition="outside")
+                fig_top_r.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+                polish_dark_fig(fig_top_r)
                 st.plotly_chart(fig_top_r, use_container_width=True)
 
             with rc2:
@@ -646,17 +695,18 @@ with tab_quality:
                     title="Lowest 10 Rated Courses (Curriculum Review Needed)",
                     text="RatingLabel",
                     color="CourseRating",
-                    color_continuous_scale="Reds_r"
+                    color_continuous_scale=["#dc2626", "#ef4444", "#f87171"]
                 )
                 fig_low_r.update_layout(
                     yaxis={'categoryorder': 'total descending'},
                     xaxis_title="Rating (Stars out of 5.0)",
                     yaxis_title="Course [Category]",
-                    xaxis=dict(range=[0, 5.6]),
+                    xaxis=dict(range=[0, 5.8]),
                     showlegend=False,
                     coloraxis_showscale=False
                 )
-                fig_low_r.update_traces(textposition="outside")
+                fig_low_r.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+                polish_dark_fig(fig_low_r)
                 st.plotly_chart(fig_low_r, use_container_width=True)
 
         with st.expander("🔍 View Complete Catalog Scatter Landscape (Duration vs. Rating)", expanded=False):
@@ -728,6 +778,7 @@ with tab_quality:
                     bordercolor="rgba(148, 163, 184, 0.2)"
                 )
             )
+            polish_dark_fig(fig_bubble)
             st.plotly_chart(fig_bubble, use_container_width=True)
 
     q_table = [
