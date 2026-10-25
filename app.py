@@ -628,13 +628,58 @@ with tab_quality:
                 labels={"CourseDuration": "Course Duration (Hours)", "CourseRating": "Course Rating (1–5 Stars)"},
                 size_max=28
             )
-            # Add quality threshold lines
-            fig_bubble.add_hline(y=4.0, line_dash="dash", line_color="#10b981", annotation_text="Quality Benchmark (4.0★)", annotation_position="top left")
-            fig_bubble.add_hline(y=2.5, line_dash="dash", line_color="#ef4444", annotation_text="Review Threshold (2.5★)", annotation_position="bottom left")
+            # High-visibility quality benchmark lines with clear badges
+            fig_bubble.add_hline(
+                y=4.0, 
+                line_dash="dash", 
+                line_color="#10b981", 
+                line_width=2.5,
+                annotation_text=" ⭐ Quality Benchmark (4.0★) ", 
+                annotation_position="top right",
+                annotation_bgcolor="#064e3b",
+                annotation_bordercolor="#10b981",
+                annotation_font=dict(color="#a7f3d0", size=12)
+            )
+            fig_bubble.add_hline(
+                y=2.5, 
+                line_dash="dash", 
+                line_color="#ef4444", 
+                line_width=2.5,
+                annotation_text=" ⚠️ Review Threshold (2.5★) ", 
+                annotation_position="bottom right",
+                annotation_bgcolor="#450a0a",
+                annotation_bordercolor="#ef4444",
+                annotation_font=dict(color="#fca5a5", size=12)
+            )
+            fig_bubble.update_traces(
+                hovertemplate="<b>%{hovertext}</b><br><br>" +
+                              "<b>Category:</b> %{customdata[0]}<br>" +
+                              "<b>Duration:</b> %{x} Hours<br>" +
+                              "<b>Student Rating:</b> %{y:.2f} ⭐<br>" +
+                              "<b>Total Enrollments:</b> %{customdata[1]:,}<extra></extra>",
+                customdata=course_bubble[["CourseCategory", "Total Enrollments"]]
+            )
             fig_bubble.update_layout(
                 xaxis_title="Course Duration (Hours)",
                 yaxis_title="Course Rating (Stars)",
-                legend_title_text="Category"
+                xaxis=dict(
+                    title_font=dict(size=13, color="#e2e8f0"),
+                    tickfont=dict(size=12, color="#cbd5e1"),
+                    gridcolor="rgba(148, 163, 184, 0.15)"
+                ),
+                yaxis=dict(
+                    range=[0.5, 5.5],
+                    dtick=1,
+                    title_font=dict(size=13, color="#e2e8f0"),
+                    tickfont=dict(size=12, color="#cbd5e1"),
+                    gridcolor="rgba(148, 163, 184, 0.15)"
+                ),
+                legend=dict(
+                    title_text="Course Category",
+                    font=dict(size=11, color="#cbd5e1"),
+                    bgcolor="rgba(15, 23, 42, 0.8)",
+                    bordercolor="rgba(148, 163, 184, 0.2)"
+                )
             )
             st.plotly_chart(fig_bubble, use_container_width=True)
 
