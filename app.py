@@ -533,8 +533,92 @@ with tab_pref:
         polish_dark_fig(fig_lev)
         st.plotly_chart(fig_lev, use_container_width=True)
 
-    st.markdown("#### Category Demand Breakdown Table")
-    st.dataframe(cat_df, use_container_width=True, hide_index=True)
+    st.markdown("---")
+    st.markdown("#### 📊 Category Demand Breakdown & Composition")
+    
+    cat_view = st.radio(
+        "Breakdown Dimension:",
+        ["Monetization Breakdown (Free vs. Paid)", "Skill Level Breakdown (Beginner / Intermediate / Advanced)", "Catalog Market Share Treemap"],
+        horizontal=True,
+        key="cat_breakdown_view"
+    )
+
+    cat_order = filtered.groupby("CourseCategory").size().sort_values(ascending=True).index.tolist()
+
+    if cat_view == "Monetization Breakdown (Free vs. Paid)":
+        cat_type = filtered.groupby(["CourseCategory", "CourseType"], dropna=False).size().reset_index(name="Enrollments")
+        fig_cat_break = px.bar(
+            cat_type,
+            y="CourseCategory",
+            x="Enrollments",
+            color="CourseType",
+            orientation="h",
+            barmode="stack",
+            text="Enrollments",
+            category_orders={"CourseCategory": cat_order},
+            title="Category Demand Broken Down by Monetization (Free vs. Paid)",
+            color_discrete_map={"Free": "#10b981", "Paid": "#3b82f6"}
+        )
+        fig_cat_break.update_traces(
+            textposition="inside",
+            textfont=dict(color="#ffffff", size=11, family="sans-serif")
+        )
+        fig_cat_break.update_layout(
+            xaxis_title="Total Enrollments",
+            yaxis_title="Course Category",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        polish_dark_fig(fig_cat_break)
+        st.plotly_chart(fig_cat_break, use_container_width=True)
+        st.caption("💡 **Commercial Dynamics:** Artificial Intelligence (77.6% Paid) and Business (59.1% Paid) lead monetization, while Marketing and Design drive top-of-funnel free acquisition.")
+
+    elif cat_view == "Skill Level Breakdown (Beginner / Intermediate / Advanced)":
+        cat_lev = filtered.groupby(["CourseCategory", "CourseLevel"], dropna=False).size().reset_index(name="Enrollments")
+        fig_cat_break = px.bar(
+            cat_lev,
+            y="CourseCategory",
+            x="Enrollments",
+            color="CourseLevel",
+            orientation="h",
+            barmode="stack",
+            text="Enrollments",
+            category_orders={"CourseCategory": cat_order},
+            title="Category Demand Broken Down by Skill Level",
+            color_discrete_map={"Beginner": "#38bdf8", "Intermediate": "#fbbf24", "Advanced": "#a855f7"}
+        )
+        fig_cat_break.update_traces(
+            textposition="inside",
+            textfont=dict(color="#ffffff", size=11, family="sans-serif")
+        )
+        fig_cat_break.update_layout(
+            xaxis_title="Total Enrollments",
+            yaxis_title="Course Category",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        )
+        polish_dark_fig(fig_cat_break)
+        st.plotly_chart(fig_cat_break, use_container_width=True)
+        st.caption("💡 **Curriculum Dynamics:** Programming leads beginner foundations (657 enrollments), while Design and Web Development cater heavily to advanced learners.")
+
+    else:
+        cat_tree = filtered.groupby(["CourseCategory", "CourseType"], dropna=False).size().reset_index(name="Enrollments")
+        fig_tree = px.treemap(
+            cat_tree,
+            path=[px.Constant("All Categories"), "CourseCategory", "CourseType"],
+            values="Enrollments",
+            title="Category Catalog Market Share Treemap",
+            color="CourseType",
+            color_discrete_map={"Free": "#10b981", "Paid": "#3b82f6", "(?)": "#6366f1"}
+        )
+        fig_tree.update_traces(
+            textinfo="label+value+percent parent",
+            textfont=dict(color="#ffffff", size=13)
+        )
+        polish_dark_fig(fig_tree)
+        st.plotly_chart(fig_tree, use_container_width=True)
+        st.caption("💡 **Catalog Proportions:** Visual market share tree of all 12 categories partitioned into Free vs. Paid demand.")
+
+    with st.expander("📋 View Detailed Category Demand Breakdown Table", expanded=False):
+        st.dataframe(cat_df, use_container_width=True, hide_index=True)
 
 # ----------------- TAB 4: DEMOGRAPHIC X COURSE PREFERENCES -----------------
 with tab_segment:
