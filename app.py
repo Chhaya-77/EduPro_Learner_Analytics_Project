@@ -639,9 +639,6 @@ with tab_pref:
         st.plotly_chart(fig_tree, use_container_width=True)
         st.caption("💡 **Market Proportions:** Data Science leads total platform demand (916 enrollments, 9.2%), Web Development holds 8.4%, and AI captures 8.3%.")
 
-    with st.expander("📋 View Detailed Category Demand Breakdown Table", expanded=False):
-        st.dataframe(cat_df, use_container_width=True, hide_index=True)
-
 # ----------------- TAB 4: DEMOGRAPHIC X COURSE PREFERENCES -----------------
 with tab_segment:
     st.subheader("Cross-Segment Demographic & Preference Interactions")
