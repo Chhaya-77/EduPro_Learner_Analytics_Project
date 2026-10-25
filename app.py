@@ -709,27 +709,14 @@ with tab_quality:
     with st.expander("📋 View Detailed Audit Log Table", expanded=False):
         st.dataframe(pd.DataFrame(q_table), use_container_width=True, hide_index=True)
 
-    st.markdown("#### Download Analysis Exports")
-    exp_col1, exp_col2 = st.columns(2)
-
-    with exp_col1:
-        csv_data = filtered.to_csv(index=False).encode("utf-8-sig")
-        st.download_button(
-            label="⬇️ Download Integrated Filtered Dataset (CSV)",
-            data=csv_data,
-            file_name="edupro_filtered_dataset.csv",
-            mime="text/csv"
-        )
-
-    with exp_col2:
-        quality_df = pd.DataFrame(q_table)
-        csv_quality = quality_df.to_csv(index=False).encode("utf-8-sig")
-        st.download_button(
-            label="⬇️ Download Data Quality Audit Report (CSV)",
-            data=csv_quality,
-            file_name="edupro_data_quality_report.csv",
-            mime="text/csv"
-        )
+    st.markdown("#### 📥 Download Dataset")
+    csv_data = filtered.to_csv(index=False).encode("utf-8-sig")
+    st.download_button(
+        label="⬇️ Download Integrated Filtered Dataset (CSV)",
+        data=csv_data,
+        file_name="edupro_filtered_dataset.csv",
+        mime="text/csv"
+    )
 
 st.divider()
 st.caption("EduPro Learner Demographics & Course Enrollment Analytics | Prepared for Unified Mentor Submission.")
