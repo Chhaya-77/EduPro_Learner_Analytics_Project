@@ -390,67 +390,90 @@ with tab_demo:
         }
         demo_u_stage = demo_u.copy()
         demo_u_stage["CareerStage"] = demo_u_stage["AgeGroup"].map(stage_map).fillna(demo_u_stage["AgeGroup"])
+
+        stage_view = st.radio(
+            "Age Dimension View:",
+            ["Career Life-Stage Share", "Life-Stage × Gender Parity"],
+            horizontal=True,
+            key="stage_view_mode"
+        )
+
         stage_order = [s for s in ["Teen (<18)", "College & Starters (18–25)", "Working Professionals (26–35)", "Mid-Career (36–45)", "Senior Learners (46+)"] if s in demo_u_stage["CareerStage"].values]
 
-        stage_gen = demo_u_stage.groupby(["CareerStage", "Gender"], dropna=False)["UserID"].nunique().reset_index(name="Learners")
-        stage_gen["SortIdx"] = stage_gen["CareerStage"].map(lambda x: stage_order.index(x) if x in stage_order else 99)
-        stage_gen = stage_gen.sort_values("SortIdx")
+        if stage_view == "Career Life-Stage Share":
+            stage_counts = demo_u_stage.groupby("CareerStage", dropna=False)["UserID"].nunique().reset_index(name="Learners")
+            tot_l = stage_counts["Learners"].sum()
+            stage_counts["Share"] = (stage_counts["Learners"] / tot_l * 100).round(1) if tot_l > 0 else 0
+            stage_counts["Display"] = stage_counts.apply(lambda r: f"{r['Learners']:,} ({r['Share']}%)", axis=1)
+            stage_counts["SortIdx"] = stage_counts["CareerStage"].map(lambda x: stage_order.index(x) if x in stage_order else 99)
+            stage_counts = stage_counts.sort_values("SortIdx")
 
-        fig_stage_gen = px.bar(
-            stage_gen,
-            x="CareerStage",
-            y="Learners",
-            color="Gender",
-            barmode="group",
-            title="Learner Demographics: Age Cohort × Gender Parity",
-            text="Learners",
-            color_discrete_map={"Female": "#f43f5e", "Male": "#3b82f6", "Other": "#f59e0b"}
-        )
-        fig_stage_gen.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
-        fig_stage_gen.update_layout(xaxis_title="Career Life-Stage", yaxis_title="Unique Learners")
-        polish_dark_fig(fig_stage_gen)
-        st.plotly_chart(fig_stage_gen, use_container_width=True)
-        st.caption("💡 **Demographic Equity:** Inclusivity holds across all stages (737 F vs 709 M in 26–35; 578 F vs 543 M in 18–25).")
+            stage_palette = {
+                "Working Professionals (26–35)": "#a855f7",
+                "College & Starters (18–25)": "#38bdf8",
+                "Teen (<18)": "#10b981",
+                "Mid-Career (36–45)": "#f59e0b",
+                "Senior Learners (46+)": "#ec4899",
+                "Unknown": "#64748b"
+            }
+
+            fig_stage = px.bar(
+                stage_counts,
+                x="CareerStage",
+                y="Learners",
+                title="Learners by Career Life-Stage (Age Cohort)",
+                text="Display",
+                color="CareerStage",
+                color_discrete_map=stage_palette
+            )
+            fig_stage.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+            fig_stage.update_layout(showlegend=False, xaxis_title="Career Life-Stage", yaxis_title="Unique Learners")
+            polish_dark_fig(fig_stage)
+            st.plotly_chart(fig_stage, use_container_width=True)
+        else:
+            stage_gen = demo_u_stage.groupby(["CareerStage", "Gender"], dropna=False)["UserID"].nunique().reset_index(name="Learners")
+            stage_gen["SortIdx"] = stage_gen["CareerStage"].map(lambda x: stage_order.index(x) if x in stage_order else 99)
+            stage_gen = stage_gen.sort_values("SortIdx")
+            
+            fig_stage_gen = px.bar(
+                stage_gen,
+                x="CareerStage",
+                y="Learners",
+                color="Gender",
+                barmode="group",
+                title="Career Life-Stage by Gender Parity",
+                text="Learners",
+                color_discrete_map={"Female": "#f43f5e", "Male": "#3b82f6", "Other": "#f59e0b"}
+            )
+            fig_stage_gen.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+            fig_stage_gen.update_layout(xaxis_title="Career Life-Stage", yaxis_title="Unique Learners")
+            polish_dark_fig(fig_stage_gen)
+            st.plotly_chart(fig_stage_gen, use_container_width=True)
+
+        st.caption("💡 **Demographic Insight:** 48.2% of users are 26–35 working professionals, followed by 37.4% college students.")
 
     with col_gen:
-        user_c_counts = filtered.groupby("UserID").size().reindex(demo_u["UserID"].unique()).fillna(0)
+        st.write("")
+        st.write("")
+        gen_u_counts = demo_u.groupby("Gender", dropna=False)["UserID"].nunique().reset_index(name="Learners")
+        tot_gen = gen_u_counts["Learners"].sum()
+        gen_u_counts["Share"] = (gen_u_counts["Learners"] / tot_gen * 100).round(1) if tot_gen > 0 else 0
+        gen_u_counts["Display"] = gen_u_counts.apply(lambda r: f"{r['Learners']:,} ({r['Share']}%)", axis=1)
 
-        def commit_band(n):
-            if n <= 1:
-                return "Single-Course (1 Course)"
-            elif n == 2:
-                return "Returning (2 Courses)"
-            else:
-                return "Power Learners (3+ Courses)"
-
-        commit_df = user_c_counts.apply(commit_band).value_counts().reset_index()
-        commit_df.columns = ["Learner Segment", "Learners"]
-        tot_c = commit_df["Learners"].sum()
-        commit_df["Share (%)"] = (commit_df["Learners"] / tot_c * 100).round(1) if tot_c > 0 else 0
-        commit_df["Display"] = commit_df.apply(lambda r: f"{r['Learners']:,} ({r['Share (%)']}%)", axis=1)
-
-        seg_order = ["Single-Course (1 Course)", "Returning (2 Courses)", "Power Learners (3+ Courses)"]
-        commit_df["SortIdx"] = commit_df["Learner Segment"].map(lambda s: seg_order.index(s) if s in seg_order else 99)
-        commit_df = commit_df.sort_values("SortIdx")
-
-        fig_commit = px.bar(
-            commit_df,
-            x="Learner Segment",
+        fig_gen_u = px.bar(
+            gen_u_counts,
+            x="Gender",
             y="Learners",
-            title="Learner Engagement & Commitment Profile",
+            title="Total Unique Learners by Gender (Macro Parity)",
             text="Display",
-            color="Learner Segment",
-            color_discrete_map={
-                "Single-Course (1 Course)": "#38bdf8",
-                "Returning (2 Courses)": "#fbbf24",
-                "Power Learners (3+ Courses)": "#a855f7"
-            }
+            color="Gender",
+            color_discrete_map={"Female": "#f43f5e", "Male": "#3b82f6", "Other": "#f59e0b"}
         )
-        fig_commit.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
-        fig_commit.update_layout(showlegend=False, xaxis_title="Learner Segment", yaxis_title="Unique Learners")
-        polish_dark_fig(fig_commit)
-        st.plotly_chart(fig_commit, use_container_width=True)
-        st.caption("💡 **Behavioral Profile:** 54.0% are single-course learners, while 25.6% are power learners enrolling in 3+ courses.")
+        fig_gen_u.update_traces(textposition="outside", textfont=dict(color="#f8fafc", size=12))
+        fig_gen_u.update_layout(showlegend=False, xaxis_title="Gender", yaxis_title="Unique Learners")
+        polish_dark_fig(fig_gen_u)
+        st.plotly_chart(fig_gen_u, use_container_width=True)
+        st.caption("💡 **Macro Equity:** Near-perfect 50/50 balance across unique learners (50.8% Female vs 49.2% Male).")
 
     st.markdown("#### Age Band Distribution (Learners vs Enrollments)")
     u_age_tbl = demo_u.groupby("AgeGroup", dropna=False).size().reset_index(name="Unique Learners")
@@ -516,53 +539,22 @@ with tab_segment:
 
     st.markdown("#### 1. Age Group × Course Category Heatmap")
     heat_counts = pd.crosstab(filtered["AgeGroup"], filtered["CourseCategory"])
+    ordered_idx = [x for x in ["<18", "18–25", "26–35", "36–45", "46+"] if x in heat_counts.index]
+    heat_counts = heat_counts.reindex(ordered_idx)
 
-    c_m1, c_m2, c_m3 = st.columns(3)
-    with c_m1:
-        normalize_mode = st.radio(
-            "Heatmap Metric Mode:",
-            ["Within-Age-Group Percentage (%)", "Absolute Enrollment Counts"],
-            horizontal=True,
-            key="heat_metric_mode"
-        )
-    with c_m2:
-        cat_sort_mode = st.radio(
-            "Category Order:",
-            ["Descending by Demand (Ranked)", "Alphabetical (A–Z)"],
-            horizontal=True,
-            key="heat_cat_sort"
-        )
-    with c_m3:
-        age_sort_mode = st.radio(
-            "Age Group Order:",
-            ["Descending by Volume (26–35 Top)", "Chronological (<18 Top)"],
-            horizontal=True,
-            key="heat_age_sort"
-        )
-
-    # Sort categories (columns)
-    if cat_sort_mode == "Descending by Demand (Ranked)":
-        cat_order = filtered["CourseCategory"].value_counts().index.tolist()
-        ordered_cols = [c for c in cat_order if c in heat_counts.columns]
-    else:
-        ordered_cols = sorted(heat_counts.columns.tolist())
-
-    # Sort age groups (rows)
-    if age_sort_mode == "Descending by Volume (26–35 Top)":
-        age_order = filtered["AgeGroup"].value_counts().index.tolist()
-        ordered_idx = [a for a in age_order if a in heat_counts.index]
-    else:
-        ordered_idx = [x for x in ["<18", "18–25", "26–35", "36–45", "46+"] if x in heat_counts.index]
-
-    heat_counts = heat_counts.reindex(index=ordered_idx, columns=ordered_cols)
+    normalize_mode = st.radio(
+        "Heatmap Display Metric:",
+        ["Absolute Enrollment Counts", "Within-Age-Group Percentage (%)"],
+        horizontal=True
+    )
 
     if not heat_counts.empty:
         if normalize_mode == "Within-Age-Group Percentage (%)":
             heat_display = (heat_counts.div(heat_counts.sum(axis=1), axis=0) * 100).round(1)
-            title_text = "Age Group × Course Category (Row % Normalized — Descending by Demand)"
+            title_text = "Age Group × Course Category (Row % Normalized)"
         else:
             heat_display = heat_counts
-            title_text = "Age Group × Course Category (Enrollment Counts — Descending by Demand)"
+            title_text = "Age Group × Course Category (Enrollment Counts)"
 
         fig_heat = px.imshow(
             heat_display,
@@ -574,7 +566,6 @@ with tab_segment:
         )
         polish_dark_fig(fig_heat)
         st.plotly_chart(fig_heat, use_container_width=True)
-        st.caption("💡 **Demographic Demand Insight:** When sorted in descending order, 26–35 working adults concentrate demand in Data Science (9.6%) and Finance (9.0%).")
 
     st.markdown("---")
     s_c1, s_c2 = st.columns(2)
