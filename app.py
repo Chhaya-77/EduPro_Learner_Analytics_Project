@@ -561,7 +561,9 @@ with tab_pref:
         )
         fig_cat_break.update_traces(
             textposition="inside",
-            textfont=dict(color="#ffffff", size=11, family="sans-serif")
+            textfont=dict(color="#ffffff", size=11, family="sans-serif"),
+            marker=dict(line=dict(color="#0b0f19", width=1.5)),
+            hovertemplate="<b>%{y}</b><br><b>%{data.name} Mode:</b> %{x:,} enrollments<extra></extra>"
         )
         fig_cat_break.update_layout(
             xaxis_title="Total Enrollments",
@@ -588,7 +590,9 @@ with tab_pref:
         )
         fig_cat_break.update_traces(
             textposition="inside",
-            textfont=dict(color="#ffffff", size=11, family="sans-serif")
+            textfont=dict(color="#ffffff", size=11, family="sans-serif"),
+            marker=dict(line=dict(color="#0b0f19", width=1.5)),
+            hovertemplate="<b>%{y}</b><br><b>%{data.name} Level:</b> %{x:,} enrollments<extra></extra>"
         )
         fig_cat_break.update_layout(
             xaxis_title="Total Enrollments",
@@ -600,22 +604,41 @@ with tab_pref:
         st.caption("💡 **Curriculum Dynamics:** Programming leads beginner foundations (657 enrollments), while Design and Web Development cater heavily to advanced learners.")
 
     else:
-        cat_tree = filtered.groupby(["CourseCategory", "CourseType"], dropna=False).size().reset_index(name="Enrollments")
+        cat_shares = filtered.groupby("CourseCategory", dropna=False).size().sort_values(ascending=False).reset_index(name="Enrollments")
+        
+        # Premium curated palette: distinct harmonious jewel tones for each category
+        category_palette = {
+            "Data Science": "#3b82f6",            # Electric Royal Blue
+            "Web Development": "#06b6d4",         # Ocean Cyan
+            "Artificial Intelligence": "#8b5cf6", # Radiant Violet
+            "Cybersecurity": "#10b981",           # Emerald Green
+            "Machine Learning": "#6366f1",        # Electric Indigo
+            "Programming": "#0284c7",             # Sky Blue
+            "Finance": "#f59e0b",                 # Golden Amber
+            "Business": "#ec4899",                # Coral Rose
+            "Project Management": "#14b8a6",      # Deep Teal
+            "Digital Marketing": "#f97316",       # Sunburst Orange
+            "Marketing": "#22c55e",               # Fresh Green
+            "Design": "#a855f7"                   # Royal Purple
+        }
+
         fig_tree = px.treemap(
-            cat_tree,
-            path=[px.Constant("All Categories"), "CourseCategory", "CourseType"],
+            cat_shares,
+            path=["CourseCategory"],
             values="Enrollments",
             title="Category Catalog Market Share Treemap",
-            color="CourseType",
-            color_discrete_map={"Free": "#10b981", "Paid": "#3b82f6", "(?)": "#6366f1"}
+            color="CourseCategory",
+            color_discrete_map=category_palette
         )
         fig_tree.update_traces(
-            textinfo="label+value+percent parent",
-            textfont=dict(color="#ffffff", size=13)
+            texttemplate="<b>%{label}</b><br><span style='font-size:15px; font-weight:700;'>%{value:,}</span><br><span style='font-size:12px; color:#e2e8f0;'>(%{percentRoot:.1%})</span>",
+            textfont=dict(color="#ffffff", size=13, family="sans-serif"),
+            marker=dict(line=dict(color="#0b0f19", width=2.5)),
+            hovertemplate="<b>%{label}</b><br><br><b>Total Demand:</b> %{value:,} Enrollments<br><b>Market Share:</b> %{percentRoot:.1%}<extra></extra>"
         )
         polish_dark_fig(fig_tree)
         st.plotly_chart(fig_tree, use_container_width=True)
-        st.caption("💡 **Catalog Proportions:** Visual market share tree of all 12 categories partitioned into Free vs. Paid demand.")
+        st.caption("💡 **Market Proportions:** Data Science leads total platform demand (916 enrollments, 9.2%), Web Development holds 8.4%, and AI captures 8.3%.")
 
     with st.expander("📋 View Detailed Category Demand Breakdown Table", expanded=False):
         st.dataframe(cat_df, use_container_width=True, hide_index=True)
