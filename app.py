@@ -523,32 +523,63 @@ with tab_quality:
     q4.metric("Verified Transactions", f"{len(transactions):,}", "Audit Complete")
 
     st.markdown("---")
+    st.markdown("#### 📈 Platform Enrollment Trajectory & Dynamics")
     
-    audit_chart_df = pd.DataFrame([
-        {"Check": "Transactions Linked to Users", "Pass Rate (%)": 100, "Details": "10,000 / 10,000 matched"},
-        {"Check": "Transactions Linked to Courses", "Pass Rate (%)": 100, "Details": "10,000 / 10,000 matched"},
-        {"Check": "Learner Age Completeness", "Pass Rate (%)": 100, "Details": "3,000 / 3,000 recorded"},
-        {"Check": "Learner Gender Completeness", "Pass Rate (%)": 100, "Details": "3,000 / 3,000 recorded"},
-        {"Check": "Catalog Course IDs Unique", "Pass Rate (%)": 100, "Details": "60 unique courses"},
-        {"Check": "Transaction IDs Unique", "Pass Rate (%)": 100, "Details": "10,000 unique records"}
-    ])
-    fig_audit = px.bar(
-        audit_chart_df,
-        x="Pass Rate (%)",
-        y="Check",
-        orientation="h",
-        title="Referential Integrity & Completeness Audit (100% Verified)",
-        text="Details",
-        color_discrete_sequence=["#10b981"]
-    )
-    fig_audit.update_layout(
-        xaxis_title="Pass Rate (%)",
-        yaxis_title="Data Integrity Dimension",
-        xaxis=dict(range=[0, 120]),
-        showlegend=False
-    )
-    fig_audit.update_traces(textposition="outside")
-    st.plotly_chart(fig_audit, use_container_width=True)
+    # Chart 1: Monthly Timeline Visualization
+    if "TransactionDate" in filtered.columns:
+        trend_df = filtered.copy()
+        trend_df["TransactionDate"] = pd.to_datetime(trend_df["TransactionDate"], errors="coerce")
+        trend_df["MonthKey"] = trend_df["TransactionDate"].dt.to_period("M").astype(str)
+        trend_df["MonthLabel"] = trend_df["TransactionDate"].dt.strftime("%b %Y")
+        
+        month_order = sorted(trend_df["MonthKey"].dropna().unique().tolist())
+        label_map = trend_df.drop_duplicates("MonthKey").set_index("MonthKey")["MonthLabel"].to_dict()
+        
+        monthly_agg = trend_df.groupby(["MonthKey", "CourseType"], dropna=False).size().reset_index(name="Enrollments")
+        monthly_agg["Month"] = monthly_agg["MonthKey"].map(label_map)
+        sorted_labels = [label_map[k] for k in month_order if k in label_map]
+        
+        fig_trend = px.area(
+            monthly_agg,
+            x="Month",
+            y="Enrollments",
+            color="CourseType",
+            category_orders={"Month": sorted_labels},
+            title="Monthly Enrollment Trajectory over Time (Free vs. Paid)",
+            color_discrete_map={"Free": "#10b981", "Paid": "#3b82f6"}
+        )
+        fig_trend.update_layout(
+            xaxis_title="Month (2025)",
+            yaxis_title="Total Enrollments",
+            hovermode="x unified"
+        )
+        st.plotly_chart(fig_trend, use_container_width=True)
+
+    # Chart 2: Course Rating vs Duration Bubble Chart
+    if "CourseRating" in courses.columns and "CourseDuration" in courses.columns:
+        st.markdown("---")
+        st.markdown("#### 🎯 Course Performance Matrix (Duration vs. Rating vs. Popularity)")
+        course_perf = filtered.groupby(["CourseID", "CourseName", "CourseCategory", "CourseLevel"], dropna=False).size().reset_index(name="Total Enrollments")
+        course_meta = courses[["CourseID", "CourseRating", "CourseDuration", "CoursePrice"]].drop_duplicates("CourseID")
+        course_bubble = course_perf.merge(course_meta, on="CourseID", how="left")
+        
+        fig_bubble = px.scatter(
+            course_bubble,
+            x="CourseDuration",
+            y="CourseRating",
+            size="Total Enrollments",
+            color="CourseCategory",
+            hover_name="CourseName",
+            title="Course Catalog Landscape: Duration vs. Student Rating (Bubble Size = Enrollments)",
+            labels={"CourseDuration": "Course Duration (Hours)", "CourseRating": "Course Rating (1–5 Stars)"},
+            size_max=32
+        )
+        fig_bubble.update_layout(
+            xaxis_title="Course Duration (Hours)",
+            yaxis_title="Course Rating (Stars)",
+            legend_title_text="Category"
+        )
+        st.plotly_chart(fig_bubble, use_container_width=True)
 
     q_table = [
         {"Audit Check": "Unique Users after Deduplication", "Observed Count": f"{quality['unique_users']:,}", "Status": "Verified"},
