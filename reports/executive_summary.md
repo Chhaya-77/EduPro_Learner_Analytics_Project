@@ -18,7 +18,7 @@ Online education platforms serve as vital public infrastructure for workforce up
 | Official Framework KPI | Description / Dimension | Quantitative Result | Strategic Interpretation |
 | :--- | :--- | :--- | :--- |
 | **Total Enrollments** | Platform engagement indicator | **10,000 Records** | Substantial platform adoption across the annual transaction window. |
-| **Enrollments by Age Group** | Demographic reach | **26–35 Yrs (48.1%) \| 18–25 Yrs (31.6%)** | Young professionals seeking career upskilling form the largest single segment. |
+| **Enrollments by Age Group** | Demographic reach | **26–35 Yrs (48.0%) \| 18–25 Yrs (37.3%) \| <18 (14.7%)** | Young professionals seeking career upskilling form the largest single segment. |
 | **Gender Participation Ratio** | Inclusivity metric | **50.8% F / 49.2% M** | Exemplary 50/50 gender parity achieved across both enrollment and unique user metrics. |
 | **Category Popularity Index** | Course demand | **Data Science (916 / 9.16%)** | Highest overall market demand, followed by Web Development and AI. |
 | **Level Preference Distribution** | Skill maturity insight | **Beginner: 35.7% \| Adv: 34.8%** | Bimodal demand: strong entry-level onboarding and high appetite for advanced mastery. |

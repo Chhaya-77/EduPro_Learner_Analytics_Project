@@ -265,7 +265,7 @@ with tab_kpi:
         st.markdown("#### Official Framework KPI Summary")
         kpi_table_data = [
             {"KPI Name": "Total Enrollments", "Description": "Platform engagement indicator", "Observed Result": f"{total_enrollments:,}", "Strategic Insight": "Total transactional course registrations on platform"},
-            {"KPI Name": "Enrollments by Age Group", "Description": "Demographic reach", "Observed Result": "26–35 Yrs: 48.1% | 18–25 Yrs: 31.6%", "Strategic Insight": "Dominant career-transition & upskilling segment"},
+            {"KPI Name": "Enrollments by Age Group", "Description": "Demographic reach", "Observed Result": "26–35: 48.0% | 18–25: 37.3% | <18: 14.7%", "Strategic Insight": "Dominant career-transition & upskilling segment"},
             {"KPI Name": "Gender Participation Ratio", "Description": "Inclusivity metric", "Observed Result": "50.8% Female / 49.2% Male", "Strategic Insight": "Near-perfect 50/50 gender equity across catalog"},
             {"KPI Name": "Category Popularity Index", "Description": "Course demand", "Observed Result": "Data Science (916 enrollments)", "Strategic Insight": "Highest demand subject domain (9.16% catalog share)"},
             {"KPI Name": "Level Preference Distribution", "Description": "Skill maturity insight", "Observed Result": "Beginner: 35.7% | Advanced: 34.8%", "Strategic Insight": "Bimodal demand: foundational skills + advanced mastery"}
