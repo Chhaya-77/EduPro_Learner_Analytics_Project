@@ -43,3 +43,11 @@ Comprehensive exploratory data analysis, descriptive learner intelligence, and i
 - **Top Course Category:** Data Science (916 enrollments, 9.16%), followed by Finance (864 enrollments) and Web Development (844 enrollments).
 - **Delivery Model:** Free courses drive 64.03% of enrollments, serving as the primary discovery and top-of-funnel entry point.
 - **Engagement Skew:** 54.0% of users take 1 course, while a dedicated core of 25.6% take 3+ courses (up to 16 courses).
+
+---
+
+## 🔗 Project Links & Submission Assets
+
+- **GitHub Repository:** [https://github.com/Chhaya-77/EduPro_Learner_Analytics_Project](https://github.com/Chhaya-77/EduPro_Learner_Analytics_Project)
+- **Academic Research Paper:** [reports/research_paper.md](reports/research_paper.md)
+- **Executive Summary Report:** [reports/executive_summary.md](reports/executive_summary.md)
